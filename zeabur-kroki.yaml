@@ -1,56 +1,88 @@
 apiVersion: zeabur.com/v1
 kind: Template
 metadata:
-  name: Kroki
+  name: Kroki Diagram Service
 spec:
-  description: Kroki provides a unified API with support for many diagram libraries including Mermaid, BPMN, and Excalidraw.
+  description: "Kroki is a unified API for generating diagrams from textual descriptions. It supports multiple diagram types including Mermaid, BPMN, and Excalidraw."
+  icon: "https://kroki.io/assets/images/kroki-icon.svg"
   tags:
-    - Diagram
-    - Tool
+    - "Diagram"
+    - "Tool"
+    - "API"
+    - "Visualization"
   readme: |
-    # Kroki
-    Kroki provides a unified API with support for many diagram libraries including Mermaid, BPMN, and Excalidraw.
+    # Kroki Diagram Service
+    
+    Kroki provides a unified API for generating diagrams from textual descriptions. This template includes:
+    
+    - **Kroki Main Service**: The main API service that handles diagram generation requests
+    - **Mermaid Service**: Handles Mermaid diagram generation
+    - **BPMN Service**: Handles BPMN diagram generation  
+    - **Excalidraw Service**: Handles Excalidraw diagram generation
+    
+    ## Features
+    
+    - Support for multiple diagram formats
+    - RESTful API for diagram generation
+    - Microservice architecture with dedicated processors
+    - Easy integration with documentation tools
+    
+    ## Usage
+    
+    Once deployed, you can generate diagrams by sending POST requests to the main Kroki service endpoint with your diagram code.
+  resourceUsage:
+    cpu: 0.5
+    memory: 1024
   services:
-    - name: Kroki
-      template: PREBUILT_V2
+    - name: kroki
+      template: PREBUILT
       spec:
         source:
           image: yuzutech/kroki
         ports:
-          - name: web
-            containerPort: 8000
-            protocol: TCP
-        env:
+          - id: web
+            port: 8000
+            type: HTTP
+        envs:
           - key: KROKI_MERMAID_HOST
             value: mermaid
           - key: KROKI_BPMN_HOST
             value: bpmn
           - key: KROKI_EXCALIDRAW_HOST
             value: excalidraw
-    - name: Mermaid
-      template: PREBUILT_V2
+        volumes:
+          - id: tmp
+            dir: /tmp
+        volumeType:
+          tmp: TMPFS
+      dependencies:
+        - mermaid
+        - bpmn
+        - excalidraw
+    - name: mermaid
+      template: PREBUILT
       spec:
         source:
           image: yuzutech/kroki-mermaid
         ports:
-          - name: web
-            containerPort: 8002
-            protocol: TCP
-    - name: BPMN
-      template: PREBUILT_V2
+          - id: service
+            port: 8002
+            type: HTTP
+    - name: bpmn
+      template: PREBUILT
       spec:
         source:
           image: yuzutech/kroki-bpmn
         ports:
-          - name: web
-            containerPort: 8003
-            protocol: TCP
-    - name: Excalidraw
-      template: PREBUILT_V2
+          - id: service
+            port: 8003
+            type: HTTP
+    - name: excalidraw
+      template: PREBUILT
       spec:
         source:
           image: yuzutech/kroki-excalidraw
         ports:
-          - name: web
-            containerPort: 8004
-            protocol: TCP
+          - id: service
+            port: 8004
+            type: HTTP  
